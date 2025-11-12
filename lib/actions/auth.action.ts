@@ -1,6 +1,6 @@
-'use server';
+"use server";
 
-import { auth, db } from "@/firebase/admin";
+import { auth, db } from "../../firebase/admin";
 import { cookies } from "next/headers";
 import { id } from "zod/locales";
 

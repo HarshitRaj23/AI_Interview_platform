@@ -15,7 +15,7 @@ import FormField from "./FormField"
 import { useRouter } from "next/navigation"
 import { create } from "domain"
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
-import { auth } from "@/firebase/client"
+import { auth } from "../firebase/client"
 import { signIn, signUp } from "@/lib/actions/auth.action"
 
 const authFormSchema = (type:FormType)=>{
