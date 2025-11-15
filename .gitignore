@@ -17,8 +17,7 @@
 /.next/
 /out/
 
-# Ignore firebase server/admin credentials and service account files
-firebase/
+
 # If you keep service account JSONs elsewhere, ignore them too
 *.serviceAccount.json
 *service-account*.json
