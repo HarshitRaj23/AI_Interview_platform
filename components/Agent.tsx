@@ -5,14 +5,15 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { vapi } from "@/lib/vapi.sdk";
-// ...rest of your component...
 
-
-// Define the agent props (add any missing props you use)
 interface AgentProps {
   userName: string;
   userId: string;
-  type?: string;
+  role: string;
+  type: string;
+  level: string;
+  amount: number;
+  techstack: string;
 }
 
 enum CallStatus {
@@ -34,7 +35,7 @@ interface Message {
   transcript?: string;
 }
 
-const Agent = ({ userName, userId, type }: AgentProps) => {
+const Agent = ({ userName, userId, role, type, level, amount, techstack }: AgentProps) => {
   const router = useRouter();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -75,22 +76,35 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     if (callStatus === CallStatus.FINISHED) router.push("/");
   }, [callStatus, router]);
 
-  // Fixed handleCall per updated VAPI API!
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    await vapi.start(
-      undefined,                        // agent/assistant param, leave undefined per new API
-      undefined,                        // 2nd param, leave undefined
-      undefined,                        // 3rd param, leave undefined
-      process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,   // workflow ID per env config
-      {
-        variableValues: {
-          userId: userId,
-          userName: userName,
-        },
-      }
-    );
+    const variables = {
+      role,
+      type,
+      level,
+      amount,
+      userid: userId, // lowercase per backend
+      techstack,
+      userName,
+    };
+
+    console.log("Starting Vapi call with variables:", variables);
+
+    try {
+      await vapi.start(
+        undefined,
+        undefined,
+        undefined,
+        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
+        {
+          variableValues: variables,
+        }
+      );
+    } catch (error) {
+      console.error("Error starting Vapi call:", error);
+      setCallStatus(CallStatus.FINISHED);
+    }
   };
 
   const handleDisconnect = async () => {
@@ -127,10 +141,7 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
           <div className="transcript">
             <p
               key={lastMessage}
-              className={cn(
-                "transition-opacity duration-500 opacity-0",
-                "animate-fadeIn opacity-100"
-              )}
+              className={cn("transition-opacity duration-500 opacity-0", "animate-fadeIn opacity-100")}
             >
               {lastMessage}
             </p>
@@ -142,11 +153,9 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
         {callStatus !== CallStatus.ACTIVE ? (
           <button className="relative btn-call" onClick={handleCall}>
             <span className={cn("absolute animate-ping rounded-full opacity-75", callStatus !== CallStatus.CONNECTING && "hidden")} />
-            <span className="relative">
-              {isCallInactiveOrFinished ? "Call" : ". . ."}
-            </span>
+            <span className="relative">{isCallInactiveOrFinished ? "Call" : ". . ."}</span>
           </button>
-        ) : ( 
+        ) : (
           <button className="btn-disconnect" onClick={handleDisconnect}>
             End
           </button>
