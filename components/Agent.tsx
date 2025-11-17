@@ -89,10 +89,11 @@ const Agent = ({
   const handleGenerateFeedback = async (messages: SavedMessage[]) => {
     console.log("Generating feedback here...");
     // Simulate feedback generation
-    const { success, id } = {
-      success: true,
-      id: "feedback-id",
-    };
+    const { success, feedbackId:id } = await createFeedback({
+      interviewId: interviewId!,
+      userId: userId!,
+      transcript: messages
+    });
 
     if (success && id) {
       router.push(`/interview/${interviewId}/feedback`);
